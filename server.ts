@@ -56,12 +56,21 @@ async function startServer() {
     const { email, password } = req.body;
     try {
       const user = await prisma.user.findUnique({ where: { email } });
-      if (!user || !(await bcrypt.compare(password, user.password))) {
+      if (!user) {
+        console.log(`Login failed: User not found (${email})`);
         return res.status(401).json({ error: "Invalid credentials" });
       }
+      
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+      if (!isPasswordValid) {
+        console.log(`Login failed: Invalid password for ${email}`);
+        return res.status(401).json({ error: "Invalid credentials" });
+      }
+
       const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, JWT_SECRET);
       res.json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role } });
     } catch (err) {
+      console.error("Critical login error:", err);
       res.status(500).json({ error: "Login failed" });
     }
   });
