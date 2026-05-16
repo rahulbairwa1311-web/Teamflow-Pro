@@ -1,0 +1,91 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+enum Role {
+  ADMIN
+  MEMBER
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+model User {
+  id            String          @id @default(uuid())
+  email         String          @unique
+  password      String
+  name          String
+  role          String          @default("MEMBER") // SQLite doesn't support enums well with Prisma, using String and validating in code
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  
+  createdProjects Project[]     @relation("ProjectCreator")
+  memberships     ProjectMember[]
+  assignedTasks   Task[]        @relation("AssignedUser")
+  createdTasks    Task[]        @relation("TaskCreator")
+}
+
+model Project {
+  id            String          @id @default(uuid())
+  title         String
+  description   String?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  
+  createdBy     User            @relation("ProjectCreator", fields: [creatorId], references: [id])
+  creatorId     String
+  
+  members       ProjectMember[]
+  tasks         Task[]
+}
+
+model ProjectMember {
+  id            String          @id @default(uuid())
+  projectId     String
+  userId        String
+  role          String          @default("MEMBER")
+  createdAt     DateTime        @default(now())
+  
+  project       Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, userId])
+}
+
+model Task {
+  id            String          @id @default(uuid())
+  title         String
+  description   String?
+  status        String          @default("TODO")
+  priority      String          @default("MEDIUM")
+  dueDate       DateTime?
+  
+  projectId     String
+  project       Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  assignedToId  String?
+  assignedTo    User?           @relation("AssignedUser", fields: [assignedToId], references: [id])
+  
+  createdById   String
+  createdBy     User            @relation("TaskCreator", fields: [createdById], references: [id])
+  
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+}

@@ -1,0 +1,68 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --radius-bento: 2rem;
+}
+
+@layer base {
+  body {
+    @apply bg-[#F9FAFB] text-slate-800 antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "ss01";
+  }
+}
+
+.bento-card {
+  @apply bg-white border border-slate-200 rounded-[2rem] p-8 shadow-sm transition-all duration-300;
+}
+
+.bento-card-indigo {
+  @apply bg-indigo-600 rounded-[2rem] p-8 text-white relative overflow-hidden shadow-xl shadow-indigo-100;
+}
+
+.bento-card-dark {
+  @apply bg-slate-900 rounded-[2rem] p-8 text-white shadow-xl flex flex-col;
+}
+
+/* Custom Scrollbar for a premium feel */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-slate-200 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-slate-300;
+}
+
+/* Smooth motion for all page changes */
+.page-enter {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.page-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 300ms, transform 300ms;
+}
+
+/* Fix for Safari/iOS input styles */
+input, select, textarea {
+  font-size: 16px !important;
+}
+
+/* Status colors and custom badges */
+.badge {
+  @apply px-2.5 py-1 rounded-lg text-xs font-bold uppercase tracking-tight;
+}
+
