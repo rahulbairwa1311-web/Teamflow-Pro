@@ -53,7 +53,7 @@ export const Users = () => {
               <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-black text-xl shadow-inner ${
                 user.role === 'ADMIN' ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-400'
               }`}>
-                {user.name.charAt(0)}
+                {user.name?.charAt(0) || 'U'}
               </div>
               <div>
                 <h3 className="font-bold text-slate-900 flex items-center gap-2">

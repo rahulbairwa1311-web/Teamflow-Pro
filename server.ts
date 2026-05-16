@@ -19,6 +19,21 @@ async function startServer() {
 
   // --- API Routes ---
 
+  // Health Check & DB Validation
+  app.get("/api/health", async (req, res) => {
+    try {
+      await prisma.$queryRaw`SELECT 1`;
+      res.json({ status: "ok", database: "connected" });
+    } catch (err: any) {
+      console.error("Database connection failed:", err);
+      res.status(500).json({ 
+        status: "error", 
+        database: "disconnected", 
+        details: err.message 
+      });
+    }
+  });
+
   // Auth Middleware
   const authMiddleware = (req: any, res: any, next: any) => {
     const token = req.headers.authorization?.split(" ")[1];
@@ -41,6 +56,7 @@ async function startServer() {
   app.post("/api/auth/signup", async (req, res) => {
     const { name, email, password, role } = req.body;
     try {
+      console.log(`Attempting signup for: ${email}`);
       const hashedPassword = await bcrypt.hash(password, 10);
       const user = await prisma.user.create({
         data: { name, email, password: hashedPassword, role: role || "MEMBER" },
@@ -48,7 +64,15 @@ async function startServer() {
       const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, JWT_SECRET);
       res.json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role } });
     } catch (err: any) {
-      res.status(400).json({ error: err.message.includes("unique") ? "Email already exists" : "Signup failed" });
+      console.error("Signup Error Stack:", err);
+      const isUniqueError = err.message.includes("unique") || err.code === 'P2002';
+      const isTableMissing = err.message.includes("does not exist") || err.code === 'P2021';
+      
+      let errorMessage = "Signup failed";
+      if (isUniqueError) errorMessage = "Email already exists";
+      if (isTableMissing) errorMessage = "Database tables not initialized. Please run 'prisma db push'";
+      
+      res.status(400).json({ error: errorMessage, details: err.message });
     }
   });
 

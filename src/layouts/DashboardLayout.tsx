@@ -74,7 +74,7 @@ export const DashboardLayout = () => {
               <span className="text-sm font-bold text-slate-800">{user.name}</span>
             </div>
             <div className="w-10 h-10 rounded-full bg-slate-200 border-2 border-white shadow-sm flex items-center justify-center font-bold text-slate-500 overflow-hidden">
-              {user.name.charAt(0)}
+              {user.name?.charAt(0) || 'U'}
             </div>
             <button 
               onClick={logout}
